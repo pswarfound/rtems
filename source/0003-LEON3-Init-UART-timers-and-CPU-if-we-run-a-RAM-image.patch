@@ -1,0 +1,61 @@
+From d8eb7955d5c62c4490df343e90e22c4a495278d3 Mon Sep 17 00:00:00 2001
+From: Jiri Gaisler <jiri@gaisler.se>
+Date: Sat, 27 Sep 2014 21:13:57 +0200
+Subject: [PATCH 3/3] LEON3: Init UART, timers and CPU if we run a RAM image
+ without loader.
+
+---
+ hw/char/grlib_apbuart.c  | 2 +-
+ hw/sparc/leon3.c         | 5 +++++
+ hw/timer/grlib_gptimer.c | 6 ++++++
+ 3 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/hw/char/grlib_apbuart.c b/hw/char/grlib_apbuart.c
+index 35ef661..da266ba 100644
+--- a/hw/char/grlib_apbuart.c
++++ b/hw/char/grlib_apbuart.c
+@@ -262,7 +262,7 @@ static void grlib_apbuart_reset(DeviceState *d)
+     /* Transmitter FIFO and shift registers are always empty in QEMU */
+     uart->status =  UART_TRANSMIT_FIFO_EMPTY | UART_TRANSMIT_SHIFT_EMPTY;
+     /* Everything is off */
+-    uart->control = 0;
++    uart->control = 0xf;
+     /* Flush receive FIFO */
+     uart->len = 0;
+     uart->current = 0;
+diff --git a/hw/sparc/leon3.c b/hw/sparc/leon3.c
+index 0ff2b27..5d91bc9 100644
+--- a/hw/sparc/leon3.c
++++ b/hw/sparc/leon3.c
+@@ -60,6 +60,11 @@ static void main_cpu_reset(void *opaque)
+     env->pc     = s->entry;
+     env->npc    = s->entry + 4;
+     env->regbase[6] = s->sp;
++    if (env->pc) {	/* enable traps and FPU if running a RAM image */
++        env->psret = 1;
++        env->psref = 1;
++        env->wim = 2;
++    }
+ }
+ 
+ void leon3_irq_ack(void *irq_manager, int intno)
+diff --git a/hw/timer/grlib_gptimer.c b/hw/timer/grlib_gptimer.c
+index d655bb2..a05304d 100644
+--- a/hw/timer/grlib_gptimer.c
++++ b/hw/timer/grlib_gptimer.c
+@@ -345,6 +345,12 @@ static void grlib_gptimer_reset(DeviceState *d)
+         ptimer_set_count(timer->ptimer, 0);
+         ptimer_set_freq(timer->ptimer, unit->freq_hz);
+     }
++    unit->reload = 39;
++    grlib_gptimer_set_scaler(unit, 39);
++    unit->timers[0].counter = 0;
++    unit->timers[0].reload = -2;
++    unit->timers[0].config = 3;
++    grlib_gptimer_enable(&unit->timers[0]);
+ }
+ 
+ static int grlib_gptimer_init(SysBusDevice *dev)
+-- 
+1.9.1
+

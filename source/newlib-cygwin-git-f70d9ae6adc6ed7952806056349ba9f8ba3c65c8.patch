@@ -1,0 +1,315 @@
+From f70d9ae6adc6ed7952806056349ba9f8ba3c65c8 Mon Sep 17 00:00:00 2001
+From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+Date: Fri, 31 Mar 2017 11:00:42 +0200
+Subject: [PATCH] Use enum __packed in favour of -fshort-enums
+
+Some architectures like ARM encode the short enum option state in the
+object file and the linker checks that this option is consistent for all
+objects of an executable.  In case applications use -fno-short-enums,
+then this leads to linker warnings.  Use the enum __packed attribute for
+the relevent enums to avoid the -fshort-enums compiler option.  This
+attribute is at least available on GCC, LLVM/clang and the Intel
+compiler.
+
+Signed-off-by: Sebastian Huber <sebastian.huber@embedded-brains.de>
+---
+ newlib/libc/stdio/Makefile.am  | 33 ++++++++++++-----------------
+ newlib/libc/stdio/Makefile.in  | 48 +++++++++++++++++++++++++-----------------
+ newlib/libc/stdio/local.h      |  6 +++---
+ newlib/libc/stdlib/Makefile.am |  2 --
+ newlib/libc/stdlib/Makefile.in |  2 --
+ newlib/libc/stdlib/mbtowc_r.c  |  6 +++---
+ 6 files changed, 49 insertions(+), 48 deletions(-)
+
+diff --git a/newlib/libc/stdio/Makefile.am b/newlib/libc/stdio/Makefile.am
+index ea23de6..943a0d5 100644
+--- a/newlib/libc/stdio/Makefile.am
++++ b/newlib/libc/stdio/Makefile.am
+@@ -16,6 +16,8 @@ GENERAL_INT_FORMATTED_IO_SOURCES = \
+ 	siscanf.c			\
+ 	sniprintf.c			\
+ 	vdiprintf.c			\
++	vfprintf.c			\
++	vfwprintf.c			\
+ 	viprintf.c			\
+ 	viscanf.c			\
+ 	vsiprintf.c			\
+@@ -205,7 +207,6 @@ LIBADD_OBJS = \
+ 	$(lpfx)svfiwprintf.$(oext)		\
+ 	$(lpfx)svfwprintf.$(oext)		\
+ 	$(lpfx)vfiwprintf.$(oext)		\
+-	$(lpfx)vfwprintf.$(oext)		\
+ 	$(lpfx)svfiwscanf.$(oext)		\
+ 	$(lpfx)svfwscanf.$(oext)		\
+ 	$(lpfx)vfiwscanf.$(oext)		\
+@@ -214,10 +215,10 @@ else
+ LIBADD_OBJS = \
+ 	$(lpfx)svfiprintf.$(oext) $(lpfx)svfprintf.$(oext) \
+ 	$(lpfx)svfiscanf.$(oext) $(lpfx)svfscanf.$(oext) \
+-	$(lpfx)vfiprintf.$(oext) $(lpfx)vfprintf.$(oext) \
++	$(lpfx)vfiprintf.$(oext) \
+ 	$(lpfx)vfscanf.$(oext) $(lpfx)vfiscanf.$(oext) \
+ 	$(lpfx)svfiwprintf.$(oext) $(lpfx)svfwprintf.$(oext) \
+-	$(lpfx)vfiwprintf.$(oext) $(lpfx)vfwprintf.$(oext) \
++	$(lpfx)vfiwprintf.$(oext) \
+ 	$(lpfx)svfiwscanf.$(oext) $(lpfx)svfwscanf.$(oext) \
+ 	$(lpfx)vfiwscanf.$(oext) $(lpfx)vfwscanf.$(oext)
+ endif
+@@ -254,44 +255,38 @@ include $(srcdir)/../../Makefile.shared
+ if NEWLIB_NANO_FORMATTED_IO
+ # Rules compiling small-footprint nano-formatted-io implementation.
+ $(lpfx)nano-vfprintf.$(oext): nano-vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf.c -o $@
++	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf.c -o $@
+ 
+ $(lpfx)nano-vfprintf_i.$(oext): nano-vfprintf_i.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf_i.c -o $@
++	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf_i.c -o $@
+ 
+ $(lpfx)nano-vfprintf_float.$(oext): nano-vfprintf_float.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf_float.c -o $@
++	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf_float.c -o $@
+ 
+ $(lpfx)nano-svfprintf.$(oext): nano-vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/nano-vfprintf.c -o $@
++	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/nano-vfprintf.c -o $@
+ endif
+ 
+ # This rule is needed so that libtool compiles vfiprintf before vfprintf.
+ # Otherwise libtool moves vfprintf.o and subsequently can't find it.
+ 
+-$(lpfx)vfprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/vfprintf.c -o $@
+-
+ $(lpfx)vfiprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -c $(srcdir)/vfprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)svfprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
++	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)svfiprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+-
+-$(lpfx)vfwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)vfiwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ $(lpfx)svfwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ $(lpfx)svfiwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ if NEWLIB_NANO_FORMATTED_IO
+ # Rules compiling small-footprint nano-formatted-io implementation.
+diff --git a/newlib/libc/stdio/Makefile.in b/newlib/libc/stdio/Makefile.in
+index 8ea5f0a..15aad34 100644
+--- a/newlib/libc/stdio/Makefile.in
++++ b/newlib/libc/stdio/Makefile.in
+@@ -80,6 +80,8 @@ lib_a_AR = $(AR) $(ARFLAGS)
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-siscanf.$(OBJEXT) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-sniprintf.$(OBJEXT) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-vdiprintf.$(OBJEXT) \
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-vfprintf.$(OBJEXT) \
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-vfwprintf.$(OBJEXT) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-viprintf.$(OBJEXT) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-viscanf.$(OBJEXT) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	lib_a-vsiprintf.$(OBJEXT) \
+@@ -192,6 +194,7 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	iprintf.lo iscanf.lo \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	siprintf.lo siscanf.lo \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	sniprintf.lo vdiprintf.lo \
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	vfprintf.lo vfwprintf.lo \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	viprintf.lo viscanf.lo \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	vsiprintf.lo vsiscanf.lo \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	vsniprintf.lo
+@@ -450,6 +453,8 @@ INCLUDES = $(NEWLIB_CFLAGS) $(CROSS_CFLAGS) $(TARGET_CFLAGS)
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	siscanf.c			\
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	sniprintf.c			\
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	vdiprintf.c			\
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	vfprintf.c			\
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	vfwprintf.c			\
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	viprintf.c			\
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	viscanf.c			\
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	vsiprintf.c			\
+@@ -608,10 +613,10 @@ GENERAL_SOURCES = \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@LIBADD_OBJS = \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)svfiprintf.$(oext) $(lpfx)svfprintf.$(oext) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)svfiscanf.$(oext) $(lpfx)svfscanf.$(oext) \
+-@NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfiprintf.$(oext) $(lpfx)vfprintf.$(oext) \
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfiprintf.$(oext) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfscanf.$(oext) $(lpfx)vfiscanf.$(oext) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)svfiwprintf.$(oext) $(lpfx)svfwprintf.$(oext) \
+-@NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfiwprintf.$(oext) $(lpfx)vfwprintf.$(oext) \
++@NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfiwprintf.$(oext) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)svfiwscanf.$(oext) $(lpfx)svfwscanf.$(oext) \
+ @NEWLIB_NANO_FORMATTED_IO_FALSE@	$(lpfx)vfiwscanf.$(oext) $(lpfx)vfwscanf.$(oext)
+ 
+@@ -627,7 +632,6 @@ GENERAL_SOURCES = \
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)svfiwprintf.$(oext)		\
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)svfwprintf.$(oext)		\
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)vfiwprintf.$(oext)		\
+-@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)vfwprintf.$(oext)		\
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)svfiwscanf.$(oext)		\
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)svfwscanf.$(oext)		\
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@	$(lpfx)vfiwscanf.$(oext)		\
+@@ -863,6 +867,18 @@ lib_a-vdiprintf.o: vdiprintf.c
+ lib_a-vdiprintf.obj: vdiprintf.c
+ 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-vdiprintf.obj `if test -f 'vdiprintf.c'; then $(CYGPATH_W) 'vdiprintf.c'; else $(CYGPATH_W) '$(srcdir)/vdiprintf.c'; fi`
+ 
++lib_a-vfprintf.o: vfprintf.c
++	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-vfprintf.o `test -f 'vfprintf.c' || echo '$(srcdir)/'`vfprintf.c
++
++lib_a-vfprintf.obj: vfprintf.c
++	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-vfprintf.obj `if test -f 'vfprintf.c'; then $(CYGPATH_W) 'vfprintf.c'; else $(CYGPATH_W) '$(srcdir)/vfprintf.c'; fi`
++
++lib_a-vfwprintf.o: vfwprintf.c
++	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-vfwprintf.o `test -f 'vfwprintf.c' || echo '$(srcdir)/'`vfwprintf.c
++
++lib_a-vfwprintf.obj: vfwprintf.c
++	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-vfwprintf.obj `if test -f 'vfwprintf.c'; then $(CYGPATH_W) 'vfwprintf.c'; else $(CYGPATH_W) '$(srcdir)/vfwprintf.c'; fi`
++
+ lib_a-viprintf.o: viprintf.c
+ 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-viprintf.o `test -f 'viprintf.c' || echo '$(srcdir)/'`viprintf.c
+ 
+@@ -1882,43 +1898,37 @@ docbook: $(DOCBOOK_OUT_FILES)
+ 
+ # Rules compiling small-footprint nano-formatted-io implementation.
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@$(lpfx)nano-vfprintf.$(oext): nano-vfprintf.c
+-@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf.c -o $@
++@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf.c -o $@
+ 
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@$(lpfx)nano-vfprintf_i.$(oext): nano-vfprintf_i.c
+-@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf_i.c -o $@
++@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf_i.c -o $@
+ 
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@$(lpfx)nano-vfprintf_float.$(oext): nano-vfprintf_float.c
+-@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/nano-vfprintf_float.c -o $@
++@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -c $(srcdir)/nano-vfprintf_float.c -o $@
+ 
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@$(lpfx)nano-svfprintf.$(oext): nano-vfprintf.c
+-@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/nano-vfprintf.c -o $@
++@NEWLIB_NANO_FORMATTED_IO_TRUE@	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/nano-vfprintf.c -o $@
+ 
+ # This rule is needed so that libtool compiles vfiprintf before vfprintf.
+ # Otherwise libtool moves vfprintf.o and subsequently can't find it.
+ 
+-$(lpfx)vfprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/vfprintf.c -o $@
+-
+ $(lpfx)vfiprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -c $(srcdir)/vfprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)svfprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
++	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)svfiprintf.$(oext): vfprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+-
+-$(lpfx)vfwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfprintf.c -o $@
+ 
+ $(lpfx)vfiwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ $(lpfx)svfwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ $(lpfx)svfiwprintf.$(oext): vfwprintf.c
+-	$(LIB_COMPILE) -fshort-enums -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
++	$(LIB_COMPILE) -DINTEGER_ONLY -DSTRING_ONLY -c $(srcdir)/vfwprintf.c -o $@
+ 
+ # Rules compiling small-footprint nano-formatted-io implementation.
+ @NEWLIB_NANO_FORMATTED_IO_TRUE@$(lpfx)nano-vfscanf.$(oext): nano-vfscanf.c
+diff --git a/newlib/libc/stdio/local.h b/newlib/libc/stdio/local.h
+index 471442e..5f69955 100644
+--- a/newlib/libc/stdio/local.h
++++ b/newlib/libc/stdio/local.h
+@@ -306,7 +306,7 @@ _VOID _EXFUN(__sinit_lock_release,(_VOID));
+ /* Types used in positional argument support in vfprinf/vfwprintf.
+    The implementation is char/wchar_t dependent but the class and state
+    tables are only defined once in vfprintf.c. */
+-typedef enum {
++typedef enum __packed {
+   ZERO,   /* '0' */
+   DIGIT,  /* '1-9' */
+   DOLLAR, /* '$' */
+@@ -319,7 +319,7 @@ typedef enum {
+   MAX_CH_CLASS /* place-holder */
+ } __CH_CLASS;
+ 
+-typedef enum {
++typedef enum __packed {
+   START,  /* start */
+   SFLAG,  /* seen a flag */
+   WDIG,   /* seen digits in width area */
+@@ -335,7 +335,7 @@ typedef enum {
+   MAX_STATE, /* place-holder */
+ } __STATE;
+ 
+-typedef enum {
++typedef enum __packed {
+   NOOP,  /* do nothing */
+   NUMBER, /* build a number from digits */
+   SKIPNUM, /* skip over digits */
+diff --git a/newlib/libc/stdlib/Makefile.am b/newlib/libc/stdlib/Makefile.am
+index 2d45d10..fb2e44e 100644
+--- a/newlib/libc/stdlib/Makefile.am
++++ b/newlib/libc/stdlib/Makefile.am
+@@ -307,8 +307,6 @@ $(lpfx)dtoa.$(oext): dtoa.c mprec.h
+ $(lpfx)ldtoa.$(oext): ldtoa.c mprec.h
+ $(lpfx)ecvtbuf.$(oext): ecvtbuf.c mprec.h
+ $(lpfx)mbtowc_r.$(oext): mbtowc_r.c mbctype.h
+-	$(LIB_COMPILE) -c -fshort-enums $(srcdir)/mbtowc_r.c -o $@
+-
+ $(lpfx)mprec.$(oext): mprec.c mprec.h
+ $(lpfx)strtod.$(oext): strtod.c mprec.h
+ $(lpfx)gdtoa-gethex.$(oext): gdtoa-gethex.c mprec.h
+diff --git a/newlib/libc/stdlib/Makefile.in b/newlib/libc/stdlib/Makefile.in
+index 466ab6d..b4b70b4 100644
+--- a/newlib/libc/stdlib/Makefile.in
++++ b/newlib/libc/stdlib/Makefile.in
+@@ -1560,8 +1560,6 @@ $(lpfx)dtoa.$(oext): dtoa.c mprec.h
+ $(lpfx)ldtoa.$(oext): ldtoa.c mprec.h
+ $(lpfx)ecvtbuf.$(oext): ecvtbuf.c mprec.h
+ $(lpfx)mbtowc_r.$(oext): mbtowc_r.c mbctype.h
+-	$(LIB_COMPILE) -c -fshort-enums $(srcdir)/mbtowc_r.c -o $@
+-
+ $(lpfx)mprec.$(oext): mprec.c mprec.h
+ $(lpfx)strtod.$(oext): strtod.c mprec.h
+ $(lpfx)gdtoa-gethex.$(oext): gdtoa-gethex.c mprec.h
+diff --git a/newlib/libc/stdlib/mbtowc_r.c b/newlib/libc/stdlib/mbtowc_r.c
+index 116b4d8..9d78256 100644
+--- a/newlib/libc/stdlib/mbtowc_r.c
++++ b/newlib/libc/stdlib/mbtowc_r.c
+@@ -55,11 +55,11 @@ _DEFUN (__ascii_mbtowc, (r, pwc, s, n, state),
+ }
+ 
+ #ifdef _MB_CAPABLE
+-typedef enum { ESCAPE, DOLLAR, BRACKET, AT, B, J, 
++typedef enum __packed { ESCAPE, DOLLAR, BRACKET, AT, B, J,
+                NUL, JIS_CHAR, OTHER, JIS_C_NUM } JIS_CHAR_TYPE;
+-typedef enum { ASCII, JIS, A_ESC, A_ESC_DL, JIS_1, J_ESC, J_ESC_BR,
++typedef enum __packed { ASCII, JIS, A_ESC, A_ESC_DL, JIS_1, J_ESC, J_ESC_BR,
+                INV, JIS_S_NUM } JIS_STATE; 
+-typedef enum { COPY_A, COPY_J1, COPY_J2, MAKE_A, NOOP, EMPTY, ERROR } JIS_ACTION;
++typedef enum __packed { COPY_A, COPY_J1, COPY_J2, MAKE_A, NOOP, EMPTY, ERROR } JIS_ACTION;
+ 
+ /************************************************************************************** 
+  * state/action tables for processing JIS encoding
+-- 
+2.9.3
+
