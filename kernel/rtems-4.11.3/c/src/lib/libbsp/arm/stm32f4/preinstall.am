@@ -33,6 +33,21 @@ $(PROJECT_INCLUDE)/bsp/$(dirstamp):
 	@: > $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp):
+	@$(MKDIR_P) $(PROJECT_INCLUDE)/bsp/stm32f7-hal
+	@: > $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/Legacy/$(dirstamp):
+	@$(MKDIR_P) $(PROJECT_INCLUDE)/bsp/stm32f7-hal/Legacy/
+	@: > $(PROJECT_INCLUDE)/bsp/stm32f7-hal/Legacy/$(dirstamp)
+PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/Legacy/$(dirstamp)
+
+$(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp):
+	@$(MKDIR_P) $(PROJECT_INCLUDE)/bsp/cmsis/
+	@: > $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+
 $(PROJECT_LIB)/bsp_specs: bsp_specs $(PROJECT_LIB)/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_LIB)/bsp_specs
 PREINSTALL_FILES += $(PROJECT_LIB)/bsp_specs
@@ -169,3 +184,54 @@ $(PROJECT_INCLUDE)/bsp/rcc.h: include/rcc.h $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/rcc.h
 PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/rcc.h
 
+$(PROJECT_INCLUDE)/bsp/cmsis/stm32f7xx.h: include/cmsis/stm32f7xx.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/stm32f7xx.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/stm32f7xx.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/stm32f767xx.h: include/cmsis/stm32f767xx.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/stm32f767xx.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/stm32f767xx.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/system_stm32f7xx.h: include/cmsis/system_stm32f7xx.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/system_stm32f7xx.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/system_stm32f7xx.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/core_cm7.h: include/cmsis/core_cm7.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/core_cm7.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/core_cm7.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/core_cmFunc.h: include/cmsis/core_cmFunc.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/core_cmFunc.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/core_cmFunc.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/core_cmInstr.h: include/cmsis/core_cmInstr.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/core_cmInstr.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/core_cmInstr.h
+
+$(PROJECT_INCLUDE)/bsp/cmsis/core_cmSimd.h: include/cmsis/core_cmSimd.h $(PROJECT_INCLUDE)/bsp/cmsis/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/cmsis/core_cmSimd.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/cmsis/core_cmSimd.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_conf.h: include/stm32f7-hal/stm32f7xx_hal_conf.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_conf.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_conf.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_def.h: include/stm32f7-hal/stm32f7xx_hal_def.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_def.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_def.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_rcc.h: include/stm32f7-hal/stm32f7xx_hal_rcc.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_rcc.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_rcc.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio.h: include/stm32f7-hal/stm32f7xx_hal_gpio.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio_ex.h: include/stm32f7-hal/stm32f7xx_hal_gpio_ex.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio_ex.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal_gpio_ex.h
+
+$(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal.h: include/stm32f7-hal/stm32f7xx_hal.h $(PROJECT_INCLUDE)/bsp/stm32f7-hal/$(dirstamp)
+	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal.h
+PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/stm32f7-hal/stm32f7xx_hal.h

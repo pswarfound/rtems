@@ -2369,7 +2369,9 @@ const rtems_libio_helper rtems_fs_init_helper =
   /** The configures the number of microseconds per clock tick. */
   #ifndef CONFIGURE_MICROSECONDS_PER_TICK
     #define CONFIGURE_MICROSECONDS_PER_TICK \
-            RTEMS_MILLISECONDS_TO_MICROSECONDS(10)
+            RTEMS_MILLISECONDS_TO_MICROSECONDS(1)
+#else
+#warning "RTEMS_MILLISECONDS_TO_MICROSECONDS defined!!!!!!!!!!!!!!!!!!!!!!!!1"
   #endif
 
   /** The configures the number of clock ticks per timeslice. */

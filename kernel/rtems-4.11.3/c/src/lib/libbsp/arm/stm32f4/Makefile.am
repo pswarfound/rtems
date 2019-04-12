@@ -63,6 +63,18 @@ include_bsp_HEADERS += include/i2c.h
 include_bsp_HEADERS += include/stm32_usart.h
 include_bsp_HEADERS += include/io.h
 include_bsp_HEADERS += include/rcc.h
+include_bsp_HEADERS += include/stm32f7-hal/stm32f7xx_hal.h
+include_bsp_HEADERS += include/stm32f7-hal/stm32f7xx_hal_gpio.h
+include_bsp_HEADERS += include/stm32f7-hal/stm32f7xx_hal_gpio_ex.h
+include_bsp_HEADERS += include/stm32f7-hal/stm32f7xx_hal_def.h
+include_bsp_HEADERS += include/stm32f7-hal/stm32f7xx_hal_conf.h
+include_bsp_HEADERS += include/cmsis/core_cm7.h
+include_bsp_HEADERS += include/cmsis/core_cmFunc.h
+include_bsp_HEADERS += include/cmsis/core_cmInstr.h
+include_bsp_HEADERS += include/cmsis/core_cmSimd.h
+include_bsp_HEADERS += include/cmsis/stm32f767xx.h
+include_bsp_HEADERS += include/cmsis/stm32f7xx.h
+include_bsp_HEADERS += include/cmsis/system_stm32f7xx.h
 
 ###############################################################################
 #                  LibBSP                                                     #
@@ -93,9 +105,6 @@ libbsp_a_SOURCES += ../shared/startup/bsp-start-memcpy.S
 libbsp_a_SOURCES += startup/bspstart.c
 libbsp_a_SOURCES += startup/bspstarthook.c
 libbsp_a_SOURCES += startup/bspreset.c
-libbsp_a_SOURCES += startup/io.c
-libbsp_a_SOURCES += startup/rcc.c
-libbsp_a_SOURCES += startup/start-config-io.c
 
 # IRQ
 libbsp_a_SOURCES += ../../shared/src/irq-default-handler.c
@@ -116,10 +125,6 @@ libbsp_a_SOURCES += ../../shared/console_write.c
 libbsp_a_SOURCES += console/console-config.c
 libbsp_a_SOURCES += console/usart.c
 
-# I2C
-libbsp_a_SOURCES += i2c/i2c.c
-libbsp_a_SOURCES += i2c/i2c-config.c
-
 # Clock
 libbsp_a_SOURCES += ../../shared/clockdrv_shell.h
 libbsp_a_SOURCES += ../shared/armv7m/clock/armv7m-clock-config.c
@@ -131,6 +136,19 @@ libbsp_a_SOURCES += ../../shared/timerstub.c
 libbsp_a_SOURCES += ../../../libcpu/shared/src/cache_manager.c
 libbsp_a_SOURCES += ../../../libcpu/arm/shared/cache/cache_.h
 libbsp_a_CPPFLAGS += -I$(srcdir)/../../../libcpu/arm/shared/include
+
+# Hal
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_cortex.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_gpio.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_pwr_ex.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_rcc.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_rcc_ex.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_dma.c
+libbsp_a_SOURCES += stm32f7-hal/stm32f7xx_hal_usart.c
+libbsp_a_CPPFLAGS += -I$(srcdir)/../../../libbsp/arm/stm32f4/include/stm32f7-hal
+libbsp_a_CPPFLAGS += -I$(srcdir)/../../../libbsp/arm/stm32f4/include/stm32f7-hal/Legacy
+libbsp_a_CPPFLAGS += -I$(srcdir)/../../../libbsp/arm/stm32f4/include/cmsis
 
 ###############################################################################
 #                  Special Rules                                              #

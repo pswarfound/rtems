@@ -113,13 +113,15 @@ static void _ARMV7M_Systick_initialize(void)
   #endif
   uint64_t us_per_tick = rtems_configuration_get_microseconds_per_tick();
   uint64_t interval = (freq * us_per_tick) / 1000000ULL;
-
-  systick->rvr = (uint32_t) interval;
+#if 1
+  HAL_InitTick(0);
+#else
+  systick->rvr = (uint32_t) 0x00034bbf;
   systick->cvr = 0;
   systick->csr = ARMV7M_SYSTICK_CSR_ENABLE
     | ARMV7M_SYSTICK_CSR_TICKINT
     | ARMV7M_SYSTICK_CSR_CLKSOURCE;
-
+#endif
   rtems_timecounter_simple_install(
     &_ARMV7M_TC.base,
     freq,

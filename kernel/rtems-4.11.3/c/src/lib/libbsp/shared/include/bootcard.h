@@ -145,7 +145,7 @@ static inline void bsp_work_area_initialize_default(
       rtems_heap_set_sbrk_amount(sbrk_amount);
     }
   #endif
-
+#define BSP_GET_WORK_AREA_DEBUG
   /*
    *  The following may be helpful in debugging what goes wrong when
    *  you are allocating the Work Area in a new BSP.

@@ -28,11 +28,14 @@ rtems_status_code rtems_io_initialize(
   void                      *argument
 )
 {
-  rtems_device_driver_entry callout;
-
+  rtems_device_driver_entry callout = NULL;
+  rtems_status_code ret = RTEMS_SUCCESSFUL;
   if ( major >= _IO_Number_of_drivers )
     return RTEMS_INVALID_NUMBER;
 
   callout = _IO_Driver_address_table[major].initialization_entry;
-  return callout ? callout(major, minor, argument) : RTEMS_SUCCESSFUL;
+  if (callout) {
+	  ret = callout(major, minor, argument);
+  }
+  return ret;
 }
